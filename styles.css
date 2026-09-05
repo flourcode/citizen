@@ -14,6 +14,8 @@ nav.main::-webkit-scrollbar{display:none}
 @media (min-width:800px){nav.main{flex-wrap:wrap;overflow:visible;white-space:normal}}
 nav.main a{color:var(--ink-2);padding:6px 0}
 nav.main a[aria-current]{color:var(--ink)}
+nav.main .langs{margin-left:auto;display:flex;gap:14px;padding-left:14px;border-left:1px solid var(--line)}
+nav.main .langs a{color:var(--accent)}
 header.bar .brand{font-weight:700;letter-spacing:-.01em;color:var(--ink)}
 header.bar .brand img{width:26px;height:26px;border-radius:7px;vertical-align:-7px;margin-right:8px}
 header.bar a.small{font-size:15px;font-weight:600}

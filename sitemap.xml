@@ -8,6 +8,9 @@
   <url><loc>https://YOURDOMAIN.com/citizenship-reading-test/</loc><priority>0.8</priority></url>
   <url><loc>https://YOURDOMAIN.com/citizenship-writing-test/</loc><priority>0.8</priority></url>
   <url><loc>https://YOURDOMAIN.com/2008-citizenship-test/</loc><priority>0.8</priority></url>
+  <url><loc>https://YOURDOMAIN.com/es/</loc><priority>0.8</priority></url>
+  <url><loc>https://YOURDOMAIN.com/zh/</loc><priority>0.8</priority></url>
+  <url><loc>https://YOURDOMAIN.com/vi/</loc><priority>0.8</priority></url>
   <url><loc>https://YOURDOMAIN.com/about/</loc><priority>0.8</priority></url>
   <url><loc>https://YOURDOMAIN.com/contact/</loc><priority>0.8</priority></url>
   <url><loc>https://YOURDOMAIN.com/privacy-policy/</loc><priority>0.8</priority></url>
