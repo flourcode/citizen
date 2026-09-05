@@ -184,7 +184,7 @@
   <h3>Settings</h3>
   <div class="group">
     <div class="row"><div><div>65/20 version</div><div class="meta">65 or older with 20 years as a permanent resident. 20 questions, 10 asked, 6 to pass.</div></div><button class="switch" role="switch" id="sw-senior" aria-checked="false" aria-label="65/20 version"></button></div>
-    <div class="row"><div><div>Read questions aloud</div><div class="meta">Hear each question the way the officer will ask it.</div></div><button class="switch" role="switch" id="sw-voice" aria-checked="false" aria-label="Read questions aloud"></button></div>
+    <div class="row"><div><div>Read questions aloud</div><div class="meta">Hear each question the way the officer will ask it, then the answer after you flip.</div></div><button class="switch" role="switch" id="sw-voice" aria-checked="false" aria-label="Read questions aloud"></button></div>
     <div class="row"><div><div>Sounds</div><div class="meta">A small tone when you get one right.</div></div><button class="switch" role="switch" id="sw-sound" aria-checked="true" aria-label="Sounds"></button></div>
   </div>
   <p class="fine">All 128 questions from the 2025 USCIS civics test, for N-400 applications filed on or after October 20, 2025. Progress stays on this device. No account, nothing sent anywhere.</p>
@@ -282,6 +282,7 @@ function flip(){
   if(celebrating){afterCelebrate();return;}
   if(flipped||!cur)return;flipped=true;window.speechSynthesis&&speechSynthesis.cancel();
   card.classList.add("flipped");setTimeout(()=>controls.classList.add("show"),250);
+  if(S.voice)setTimeout(()=>say(answerText(),$("#b-speak")),400);
 }
 const PRAISE=["Nice.","Yes.","Solid.","That's the one.","Good.","Right.","Easy now.","Keep going."];
 function answer(ok){
@@ -340,7 +341,8 @@ function say(text,btn){if(!canSpeak)return;speechSynthesis.cancel();const u=new 
   if(btn){btn.classList.add("on");u.onend=u.onerror=()=>btn.classList.remove("on");}speechSynthesis.speak(u);}
 if(!canSpeak){$("#f-speak").style.display="none";$("#b-speak").style.display="none";}
 $("#f-speak").addEventListener("click",e=>{e.stopPropagation();if(cur)say(cur.q,e.currentTarget);});
-$("#b-speak").addEventListener("click",e=>{e.stopPropagation();if(!cur)return;say(cur.vary?(S.own[cur.n]||"Type your answer first"):cur.a[0],e.currentTarget);});
+function answerText(){return cur.vary?(S.own[cur.n]||"Type your answer first"):$("#b-a").textContent;}
+$("#b-speak").addEventListener("click",e=>{e.stopPropagation();if(!cur)return;say(answerText(),e.currentTarget);});
 $("#b-input").addEventListener("input",e=>{if(cur){S.own[cur.n]=e.target.value.trim();save();}});
 $("#b-input").addEventListener("keydown",e=>{if(e.key==="Enter")e.target.blur();e.stopPropagation();});
 $("#b-own").addEventListener("pointerdown",e=>e.stopPropagation());
