@@ -23,12 +23,16 @@
   a{color:var(--accent);text-decoration:none}
 
   /* top: menu, progress bar, streak */
-  .top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:14px 16px 0}
+  .top{display:grid;grid-template-columns:44px 1fr 44px 44px;align-items:center;gap:4px;padding:14px 12px 0 16px}
+  .icon.off{color:var(--ink-3)}
+  .icon.off .wave{display:none}
+  .icon.off .slash{display:block}
+  .icon .slash{display:none}
   .icon{width:44px;height:44px;display:grid;place-items:center;color:var(--accent);border-radius:22px}
   .icon svg{width:22px;height:22px}
   .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
   .bar i{display:block;height:100%;width:0;background:var(--good);border-radius:5px;transition:width .45s cubic-bezier(.2,.8,.2,1)}
-  .sub{grid-column:2;text-align:center;font-size:12px;color:var(--ink-2);margin-top:6px;font-variant-numeric:tabular-nums;min-height:15px}
+  .sub{grid-column:2 / 4;text-align:center;font-size:12px;color:var(--ink-2);margin-top:6px;font-variant-numeric:tabular-nums;min-height:15px}
   .sub b{color:var(--ink);font-weight:600}
   .fire{font-weight:600}
   .fire.hot{color:#ff9500}
@@ -126,6 +130,7 @@
 <div class="top">
   <button class="icon" id="open-sheet" aria-label="Rounds and settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <div class="bar" role="progressbar" aria-label="Round progress"><i id="bar"></i></div>
+  <button class="icon" id="voice-toggle" role="switch" aria-checked="true" aria-label="Read aloud" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="slash" d="M16 9l5 6M21 9l-5 6"/></svg></button>
   <a class="icon" href="../" aria-label="Back to the site" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg></a>
   <div class="sub" id="sub"></div>
 </div>
@@ -220,7 +225,7 @@ function buildRounds(senior){
 
 /* ---------- state ---------- */
 let S;  // persisted
-function fresh(){return {v:2,stats:{},done:[],senior:false,voice:false,sound:true,own:{},streakDays:0,lastDay:0,best:0};}
+function fresh(){return {v:2,stats:{},done:[],senior:false,voice:true,sound:true,own:{},streakDays:0,lastDay:0,best:0};}
 const KEY="civics-trainer.v2";
 const load=()=>{try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.v===2)return d;}catch(e){}return null;};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
@@ -339,7 +344,7 @@ const canSpeak="speechSynthesis" in window;
 function say(text,btn){if(!canSpeak)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=0.92;
   const vs=speechSynthesis.getVoices(),v=vs.find(v=>v.lang==="en-US"&&/Samantha|Ava|Google US|Aria|Jenny/.test(v.name))||vs.find(v=>v.lang==="en-US");if(v)u.voice=v;
   if(btn){btn.classList.add("on");u.onend=u.onerror=()=>btn.classList.remove("on");}speechSynthesis.speak(u);}
-if(!canSpeak){$("#f-speak").style.display="none";$("#b-speak").style.display="none";}
+if(!canSpeak){$("#f-speak").style.display="none";$("#b-speak").style.display="none";$("#voice-toggle").style.visibility="hidden";}
 $("#f-speak").addEventListener("click",e=>{e.stopPropagation();if(cur)say(cur.q,e.currentTarget);});
 function answerText(){return cur.vary?(S.own[cur.n]||"Type your answer first"):$("#b-a").textContent;}
 $("#b-speak").addEventListener("click",e=>{e.stopPropagation();if(!cur)return;say(answerText(),e.currentTarget);});
@@ -377,7 +382,11 @@ function renderSheet(){
   $("#sw-senior").setAttribute("aria-checked",S.senior);$("#sw-voice").setAttribute("aria-checked",S.voice);$("#sw-sound").setAttribute("aria-checked",S.sound);
 }
 $("#sw-senior").onclick=()=>{S.senior=!S.senior;rounds=buildRounds(S.senior);save();renderSheet();pendingRestart=true;};
-$("#sw-voice").onclick=()=>{S.voice=!S.voice;save();renderSheet();if(S.voice)say("Reading questions aloud.");};
+function setVoice(on,fromTop){S.voice=on;save();renderVoice();if($("#sheet").classList.contains("open"))renderSheet();
+  if(on){if(cur&&!celebrating)say(flipped?answerText():cur.q,flipped?$("#b-speak"):$("#f-speak"));}else if(window.speechSynthesis)speechSynthesis.cancel();}
+function renderVoice(){const b=$("#voice-toggle");b.classList.toggle("off",!S.voice);b.setAttribute("aria-checked",S.voice);b.title=S.voice?"Read aloud: on":"Read aloud: off";}
+$("#voice-toggle").onclick=()=>setVoice(!S.voice,true);
+$("#sw-voice").onclick=()=>setVoice(!S.voice);
 $("#sw-sound").onclick=()=>{S.sound=!S.sound;save();renderSheet();if(S.sound)ding(true);};
 $("#do-review").onclick=()=>{closeSheet(true);startReview();};
 $("#do-test").onclick=()=>{closeSheet(true);startRound({id:"test",title:"Practice test",transient:true,ids:BANK.filter(b=>!S.senior||b.star).map(b=>b.n)},{shuffle:true,test:true});};
@@ -398,7 +407,8 @@ let first=nextRoundFor()||rounds[0];
 const sec=qp.get("section");const secName=Object.keys(SLUGS).find(k=>SLUGS[k]===sec);
 if(secName){const r=rounds.find(r=>r.title===secName);if(r)first=r;}
 if(qp.toString())history.replaceState(null,"",location.pathname);
-save();startRound(first);
+save();renderVoice();startRound(first);
+let primed=false;document.addEventListener("pointerdown",()=>{if(primed)return;primed=true;if(S.voice&&cur&&!flipped&&canSpeak&&!speechSynthesis.speaking)say(cur.q,$("#f-speak"));},{once:true,capture:true});
 </script>
 </body>
 </html>
